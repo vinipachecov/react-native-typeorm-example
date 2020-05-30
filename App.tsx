@@ -1,114 +1,85 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
+import React, { useCallback, useEffect, ReactNode, useState } from 'react';
+import { StyleSheet, View, Text } from 'react-native';
 
-import React, {ReactNode} from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
+import { createConnection, getRepository, Connection } from 'typeorm/browser';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import { Author } from './entities/author';
+import { Category } from './entities/category';
+import { Post } from './entities/post';
+
+const AuthorTile = ({
+  name,
+  birthdate,
+}: {
+  name: string;
+  birthdate: string;
+}) => {
+  return (
+    <View>
+      <Text>{name}</Text>
+      <Text>{birthdate}</Text>
+    </View>
+  );
+};
 
 const App: () => ReactNode = () => {
+  const [defaultConnection, setconnection] = useState<Connection | null>(null);
+  const [authors, setAuthors] = useState<Author[]>([]);
+  const setupConnection = useCallback(async () => {
+    try {
+      const connection = await createConnection({
+        type: 'react-native',
+        database: 'test',
+        location: 'default',
+        logging: ['error', 'query', 'schema'],
+        synchronize: true,
+        entities: [Author, Category, Post],
+      });
+      setconnection(connection);
+      getAuthors();
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  const getAuthors = useCallback(async () => {
+    const authorRepository = getRepository(Author);
+    let result = await authorRepository.find();
+    if (result.length === 0) {
+      const newAuthor = new Author();
+      newAuthor.birthdate = '10-03-1940';
+      newAuthor.name = 'Chuck Norris';
+      await authorRepository.save(newAuthor);
+      result = await authorRepository.find();
+    }
+    setAuthors(result);
+  }, []);
+
+  useEffect(() => {
+    if (!defaultConnection) {
+      setupConnection();
+    } else {
+      getAuthors();
+    }
+  }, []);
+
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
+    <View style={styles.container}>
+      <Text style={styles.title}>My List of Authors</Text>
+      {authors.map((author) => (
+        <AuthorTile key={author.id.toString()} {...author} />
+      ))}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
+  title: { fontSize: 16, color: 'black' },
 });
 
 export default App;
