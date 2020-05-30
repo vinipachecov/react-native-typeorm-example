@@ -250,3 +250,5 @@ The getAuthors callback is where the typeorm repository magic appears. For the s
 
   ![Android](https://github.com/vinipachecov/react-native-typeorm-example/blob/master/tutorial-pics/end-picture.png?raw=true)
   ![IOS](https://github.com/vinipachecov/react-native-typeorm-example/blob/master/tutorial-pics/ios-picture.png?raw=true)
+
+  If you have any problems check the [github project repository ](https://github.com/vinipachecov/react-native-typeorm-example) or feel free to send me a message. 
