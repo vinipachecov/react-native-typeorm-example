@@ -7,7 +7,7 @@ import {
 } from 'typeorm/browser';
 
 import { IUser } from '../interfaces/IUser';
-import { IUserPreference } from '../interfaces/IUserPreference';
+import { UserPreference } from './userPreference';
 
 @Entity({ name: 'user' })
 export class User implements IUser {
@@ -17,7 +17,7 @@ export class User implements IUser {
   @Column({ type: 'uuid', nullable: true })
   eauthId!: string;
 
-  @OneToOne('UserPreference')
+  @OneToOne(() => UserPreference)
   @JoinColumn()
-  userPreference!: IUserPreference;
+  userPreference!: UserPreference;
 }
