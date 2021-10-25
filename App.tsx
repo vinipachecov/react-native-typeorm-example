@@ -6,6 +6,8 @@ import { createConnection, getRepository, Connection } from 'typeorm/browser';
 import { Author } from './entities/author';
 import { Category } from './entities/category';
 import { Post } from './entities/post';
+import { User } from './entities/user';
+import { UserPreference } from './entities/userPreference';
 
 const AuthorTile = ({
   name,
@@ -33,7 +35,7 @@ const App: () => ReactNode = () => {
         location: 'default',
         logging: ['error', 'query', 'schema'],
         synchronize: true,
-        entities: [Author, Category, Post],
+        entities: [Author, Category, Post, User, UserPreference],
       });
       setconnection(connection);
       getAuthors();
